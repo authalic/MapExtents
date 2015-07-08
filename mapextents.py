@@ -46,4 +46,23 @@ def mxdwalk(rootdir):
     return mxdfiles
 
 
+# geojson sample code
+# creates and exports a GeogJSON polygon (extent) from four input points 
+
+# create the Polygon
+pg = geojson.Polygon([[(-111.898898, 40.764253), (-111.891796, 40.764253), (-111.891796, 40.758667), (-111.898898, 40.758667), (-111.898898, 40.764253)]])
+
+# create a Feature from the Polygon
+fp1 = geojson.Feature(geometry=pg)
+
+# create a FeatureCollection from the Feature
+fcpoly = geojson.FeatureCollection([fp1])
+
+# additional Features can be added to the FeatureCollection using .update([Feature])  maybe.
+
+# encode the FeatureCollection to GeoJson 
+polydump = geojson.dumps(fcpoly)
+
+print(polydump)
+
 

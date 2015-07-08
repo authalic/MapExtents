@@ -4,15 +4,21 @@
 import arcpy
 import arcpy.mapping
 
-mxd = arcpy.mapping.MapDocument(r'C:\projects\arcpy\newpark.mxd')
+MapDoc = arcpy.mapping.MapDocument(r'C:\projects\arcpy\newpark.mxd')
 
-# Export a JPEG of the layout
-arcpy.mapping.ExportToJPEG(mxd, r'C:\projects\arcpy\test.jpg', resolution=100)
+outputpath = r'C:\projects\arcpy\test.jpg'
+
+def exportMXDtoJPEG(MapDoc, outputpath):
+    "Exports a MapDocument object to a JPEG saved in outputpath"
+    arcpy.mapping.ExportToJPEG(MapDoc, outputpath, resolution=100)
+
+exportMXDtoJPEG(MapDoc, outputpath)
+
 
 # Extent of the DataFrame is exported in the coordinate system of the DataFrame
 # This will need to be reprojected to NAD83 dec.deg. for Google Maps API 
 
-for df in arcpy.mapping.ListDataFrames(mxd):
+for df in arcpy.mapping.ListDataFrames(MapDoc):
     print df.extent.JSON
     newdf = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
     print newdf.JSON
