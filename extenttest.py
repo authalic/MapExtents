@@ -14,5 +14,10 @@ arcpy.mapping.ExportToJPEG(mxd, r'C:\projects\arcpy\test.jpg', resolution=100)
 
 for df in arcpy.mapping.ListDataFrames(mxd):
     print df.extent.JSON
+    # {"xmin":454071.06987482228,"ymin":4507675.2277499037,"xmax":454589.22443413141,"ymax":4508387.6991748465,"spatialReference":{"wkid":26912,"latestWkid":26912}}
+    
     newdf = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
+    
     print newdf.JSON
+    # {"xmin":-111.54385862989017,"ymin":40.718719659772312,"xmax":-111.53767161146764,"ymax":40.725166537926839,"spatialReference":{"wkid":4326,"latestWkid":4326}}
+    

@@ -19,6 +19,16 @@ exportMXDtoJPEG(MapDoc, outputpath)
 # This will need to be reprojected to NAD83 dec.deg. for Google Maps API 
 
 for df in arcpy.mapping.ListDataFrames(MapDoc):
-    print df.extent.JSON
-    newdf = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
-    print newdf.JSON
+    
+    dfextent = df.extent
+    
+    # check if data frame is already in WGS 1984
+    # WKID 4326: GCS_WGS_1984 (decimal degrees)
+    if not dfextent.spatialReference.factoryCode == 4326:
+        dfextent = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
+    
+    
+    print dfextent.spatialReference.factoryCode
+    print dfextent.JSON
+    
+    
