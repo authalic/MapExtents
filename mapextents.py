@@ -10,9 +10,13 @@ import arcpy
 import arcpy.mapping
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
 
-rootdir = r'C:\projects\arcpy'
-# rootdir = r"C:\projects\EDCU\EDCU 2012\MXD files"
+# rootdir = r'C:\projects\arcpy'
+print "working"
+
+rootdir = r"Y:\Maps\EDCU\EDCU 2015"
 JPEGpath = r"C:\test\output"
+
+JSONfile = r"C:\test\output\extents.json"
 
 
 def mxdwalk(rootdir):
@@ -72,13 +76,15 @@ mxdPaths.sort()
 geoJSONfeatures = []
 
 for mxdPath in mxdPaths:
+    print "processing: " + mxdPath
+    
     JPEGfilename = os.path.splitext(os.path.split(mxdPath)[1])[0] + ".jpg"
     
     # Get the map document
     mxd = arcpy.mapping.MapDocument(mxdPath)
     
     # export the layout of the map document to a JPEG in the output path specified above
-    # arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
+    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
     
     for df in arcpy.mapping.ListDataFrames(mxd):
         dfextent = df.extent
@@ -96,6 +102,10 @@ for mxdPath in mxdPaths:
 fc = geojson.FeatureCollection(geoJSONfeatures)
 dump = geojson.dumps(fc)
 
-print dump
+JSONoutput = open(JSONfile, 'w')
+JSONoutput.write(dump)
+JSONoutput.close()
+
+print "done"
 
 
