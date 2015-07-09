@@ -10,7 +10,8 @@ import arcpy
 import arcpy.mapping
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
 
-rootdir = r"C:\projects\EDCU\EDCU 2012\MXD files"
+rootdir = r'C:\projects\arcpy'
+# rootdir = r"C:\projects\EDCU\EDCU 2012\MXD files"
 JPEGpath = r"C:\test\output"
 
 
@@ -34,21 +35,14 @@ def mxdwalk(rootdir):
     return mxdfiles
 
 
-
-
-extentJSON = {"xmin":-111.54385862989017,"ymin":40.718719659772312,"xmax":-111.53767161146764,"ymax":40.725166537926839,"spatialReference":{"wkid":4326,"latestWkid":4326}}
-
 def extentGeoJSONfeature(extent):
     "Converts Map Document Dataframe Extent object to a GeoJSON Polygon Feature"
     
-    # convert the Extent to JSON, implemented as a dictionary
-    extentJSON = extent.JSON
-    
     # build tuples of each corner point (x, y)
-    UL = (extentJSON['xmin'], extentJSON['ymax'])  # upper-left corner of extent
-    UR = (extentJSON['xmax'], extentJSON['ymax'])  # upper-right
-    LR = (extentJSON['xmax'], extentJSON['ymin'])  # lower-right
-    LL = (extentJSON['xmin'], extentJSON['ymin'])  # lower-left
+    UL = (extent.XMin, extent.YMax)  # upper-left corner of extent
+    UR = (extent.XMax, extent.YMax)  # upper-right
+    LR = (extent.XMax, extent.YMin)  # lower-right
+    LL = (extent.XMin, extent.YMin)  # lower-left
     
     # build the GeoJSON Polygon
     pg = geojson.Polygon([[UL, UR, LR, LL, UL]])
@@ -84,7 +78,7 @@ for mxdPath in mxdPaths:
     mxd = arcpy.mapping.MapDocument(mxdPath)
     
     # export the layout of the map document to a JPEG in the output path specified above
-    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
+    # arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
     
     for df in arcpy.mapping.ListDataFrames(mxd):
         dfextent = df.extent
@@ -95,7 +89,8 @@ for mxdPath in mxdPaths:
             dfextent = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
         
         # reproject to WGS84 and append the Extent to the list of GeoJSON Features
-        geoJSONfeatures.append(extentGeoJSONfeature(dfextent))
+        ext = extentGeoJSONfeature(dfextent)
+        geoJSONfeatures.append(ext)
 
 
 fc = geojson.FeatureCollection(geoJSONfeatures)
