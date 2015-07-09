@@ -9,11 +9,12 @@ import os.path
 import arcpy
 import arcpy.mapping
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
+import multiprocessing
 
 # rootdir = r'C:\projects\arcpy'
 print "working"
 
-rootdir = r"Y:\Maps\EDCU\EDCU 2015"
+rootdir = r"Y:\Maps\Fitness"
 JPEGpath = r"C:\test\output"
 
 JSONfile = r"C:\test\output\extents.json"
@@ -75,6 +76,7 @@ mxdPaths.sort()
 # create a list to store the extent geometries of each MXD as GeoJSON Features
 geoJSONfeatures = []
 
+
 for mxdPath in mxdPaths:
     print "processing: " + mxdPath
     
@@ -84,8 +86,17 @@ for mxdPath in mxdPaths:
     mxd = arcpy.mapping.MapDocument(mxdPath)
     
     # export the layout of the map document to a JPEG in the output path specified above
-    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
     
+    # BUG NOTE:
+    # the arcpy.mapping methods to export images seem to crash at some point when looping through files
+    # it's an ESRI bug somewhere, apparently.
+    # see: http://gis.stackexchange.com/questions/146477/python-crashes-when-running-arcpys-exporttopdf-exporttopng-exporttojpeg
+
+    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
+
+    # WORKAROUND:
+    # use the multiprocessing module to add freeze support
+
     for df in arcpy.mapping.ListDataFrames(mxd):
         dfextent = df.extent
         
