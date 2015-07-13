@@ -14,7 +14,7 @@ import multiprocessing
 # rootdir = r'C:\projects\arcpy'
 print "working"
 
-rootdir = r"Y:\Maps\Fitness"
+rootdir = r"Y:\Maps\Major Tenants"
 JPEGpath = r"C:\test\output"
 
 JSONfile = r"C:\test\output\extents.json"
@@ -102,7 +102,14 @@ for mxdPath in mxdPaths:
     # export the layout of the map document to a JPEG in the output path specified above
     #arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
     
-    exportPDF(mxd, os.path.join(JPEGpath, JPEGfilename))
+    if __name__ == '__main__':
+        print("MAIN")
+        multiprocessing.freeze_support()
+        p = multiprocessing.Process(target = exportPDF, args = (mxd, os.path.join(JPEGpath, JPEGfilename)))
+        p.start()
+        p.join()
+    
+    # exportPDF(mxd, os.path.join(JPEGpath, JPEGfilename))
     
 
     for df in arcpy.mapping.ListDataFrames(mxd):
