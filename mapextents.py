@@ -4,17 +4,16 @@
 # This will be the final working application
 # Code developed in other files will be incorporated into this file as it is completed
 
-
 import os.path
 import arcpy
 import arcpy.mapping
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
-import multiprocessing
+import time
 
 # rootdir = r'C:\projects\arcpy'
 print "working"
 
-rootdir = r"Y:\Maps\Fitness"
+rootdir = r"Y:\Maps\Major Tenants"
 JPEGpath = r"C:\test\output"
 
 JSONfile = r"C:\test\output\extents.json"
@@ -92,10 +91,11 @@ for mxdPath in mxdPaths:
     # it's an ESRI bug somewhere, apparently.
     # see: http://gis.stackexchange.com/questions/146477/python-crashes-when-running-arcpys-exporttopdf-exporttopng-exporttojpeg
 
-    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
+    # arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
 
-    # WORKAROUND:
+    # WORKAROUND tested:
     # use the multiprocessing module to add freeze support
+    # the Pickle module doesn't seem to like to use a Map object as a parameter
 
     for df in arcpy.mapping.ListDataFrames(mxd):
         dfextent = df.extent
@@ -108,6 +108,9 @@ for mxdPath in mxdPaths:
         # reproject to WGS84 and append the Extent to the list of GeoJSON Features
         ext = extentGeoJSONfeature(dfextent)
         geoJSONfeatures.append(ext)
+    
+    time.sleep(10)
+    del mxd
 
 
 fc = geojson.FeatureCollection(geoJSONfeatures)
