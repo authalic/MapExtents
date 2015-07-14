@@ -1,7 +1,7 @@
 import arcpy
 import os.path
 
-rootdir = r'Y:\Maps\Major Tenants'
+rootdir = r'C:\projects'
 outpath = r'C:\test\output'
 
 for (dirName, subdirList, fileList) in os.walk(rootdir):
@@ -14,6 +14,6 @@ for (dirName, subdirList, fileList) in os.walk(rootdir):
             mxd = arcpy.mapping.MapDocument(mxdfile)
             print "MXD Path: " + mxd.filePath + "\n"
             
-            arcpy.mapping.ExportToJPEG(mxd, os.path.join(outpath, filename[:-3] + "jpg") , resolution=100)
+            arcpy.mapping.ExportToJPEG(mxd, os.path.join(outpath, filename[:-3] + "jpg"))
 
 print("done")
