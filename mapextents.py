@@ -1,4 +1,3 @@
-
 # top-level file
 #
 # This will be the final working application
@@ -10,11 +9,11 @@ import arcpy.mapping
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
 import time
 
-# rootdir = r'C:\projects\arcpy'
 print "working"
 
-rootdir = r"Y:\Maps\Major Tenants"
+rootdir = r"S:\Brandon Dalton\ArcMap\Flyer Aerials"
 JPEGpath = r"C:\test\output"
+PDFpath = r"C:\test\output"
 
 JSONfile = r"C:\test\output\extents.json"
 
@@ -39,7 +38,7 @@ def mxdwalk(rootdir):
     return mxdfiles
 
 
-def extentGeoJSONfeature(extent):
+def GeoJSONfeature(extent, mapname):
     "Converts Map Document Dataframe Extent object to a GeoJSON Polygon Feature"
     
     # build tuples of each corner point (x, y)
@@ -48,11 +47,12 @@ def extentGeoJSONfeature(extent):
     LR = (extent.XMax, extent.YMin)  # lower-right
     LL = (extent.XMin, extent.YMin)  # lower-left
     
-    # build the GeoJSON Polygon
+    # build the GeoJSON Polygon feature
     pg = geojson.Polygon([[UL, UR, LR, LL, UL]])
     
     # build the GeoJSON Feature using the Polygon
-    fp = geojson.Feature(geometry=pg)
+    # add any additional Properties here
+    fp = geojson.Feature(geometry=pg, properties={"map": mapname})
     
     return fp
 
@@ -80,18 +80,22 @@ for mxdPath in mxdPaths:
     print "processing: " + mxdPath
     
     JPEGfilename = os.path.splitext(os.path.split(mxdPath)[1])[0] + ".jpg"
-    
+    PDFfilename  = os.path.splitext(os.path.split(mxdPath)[1])[0] + ".pdf"
+
+    mapname = os.path.splitext(os.path.split(mxdPath)[1])[0]
+
     # Get the map document
     mxd = arcpy.mapping.MapDocument(mxdPath)
     
-    # export the layout of the map document to a JPEG in the output path specified above
+    # export the layout of the map document to a JPEG or PDF in the output path specified above
     
     # BUG NOTE:
     # the arcpy.mapping methods to export images seem to crash at some point when looping through files
     # it's an ESRI bug somewhere, apparently.
     # see: http://gis.stackexchange.com/questions/146477/python-crashes-when-running-arcpys-exporttopdf-exporttopng-exporttojpeg
 
-    # arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=100)
+    arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=200)
+    arcpy.mapping.ExportToPDF(mxd, os.path.join(PDFpath, PDFfilename),resolution=200, image_quality='BEST' )
 
     # WORKAROUND tested:
     # use the multiprocessing module to add freeze support
@@ -99,18 +103,21 @@ for mxdPath in mxdPaths:
 
     for df in arcpy.mapping.ListDataFrames(mxd):
         dfextent = df.extent
-        
+
         # check if data frame is already in WGS 1984
         # WKID 4326: GCS_WGS_1984 (decimal degrees)
+
         if not dfextent.spatialReference.factoryCode == 4326:
+            # reproject to WGS84
             dfextent = df.extent.projectAs(arcpy.SpatialReference(4326))  # WKID 4326: GCS_WGS_1984 (decimal degrees)
-        
-        # reproject to WGS84 and append the Extent to the list of GeoJSON Features
-        ext = extentGeoJSONfeature(dfextent)
-        geoJSONfeatures.append(ext)
+
+        # get a GeoJSON Polygon Feature using the dataframe extent
+        GeoFeature = GeoJSONfeature(dfextent, mapname)
+
+        # append the geo GeoJSON polygon to the list of all GeoJSON extents
+        geoJSONfeatures.append(GeoFeature)
     
     time.sleep(10)
-    del mxd
 
 
 fc = geojson.FeatureCollection(geoJSONfeatures)
