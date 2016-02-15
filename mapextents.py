@@ -3,19 +3,24 @@
 # This will be the final working application
 # Code developed in other files will be incorporated into this file as it is completed
 
+import os
 import os.path
+import time
 import arcpy
 import arcpy.mapping
+import json
 import geojson # https://pypi.python.org/pypi/geojson/1.2.0
-import time
+
+from arcpy import env
 
 print "working"
 
-rootdir = r"S:\Brandon Dalton\ArcMap\Flyer Aerials"
+rootdir = r"M:\TenantAerials\ArcMap"
 JPEGpath = r"C:\test\output"
 PDFpath = r"C:\test\output"
 
 JSONfile = r"C:\test\output\extents.json"
+filedictionary = r"C:\test\output\filedict.json"
 
 
 def mxdwalk(rootdir):
@@ -94,6 +99,7 @@ for mxdPath in mxdPaths:
     # it's an ESRI bug somewhere, apparently.
     # see: http://gis.stackexchange.com/questions/146477/python-crashes-when-running-arcpys-exporttopdf-exporttopng-exporttojpeg
 
+
     arcpy.mapping.ExportToJPEG(mxd, os.path.join(JPEGpath, JPEGfilename) , resolution=200)
     arcpy.mapping.ExportToPDF(mxd, os.path.join(PDFpath, PDFfilename),resolution=200, image_quality='BEST' )
 
@@ -123,9 +129,8 @@ for mxdPath in mxdPaths:
 fc = geojson.FeatureCollection(geoJSONfeatures)
 dump = geojson.dumps(fc)
 
-JSONoutput = open(JSONfile, 'w')
-JSONoutput.write(dump)
-JSONoutput.close()
+with open(JSONfile, 'w') as JSONoutput:
+    JSONoutput.write(dump)
 
 print "done"
 
