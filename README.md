@@ -1,2 +1,2 @@
 # MapExtents
-Obtains the map extent of an ArcMap layout. Exports it as a polygon.
+Loops through a folder of ArcGIS MXD files. Obtains the map extent of each ArcMap layout, and various file attribultes. Exports it as a GeoJSON polygon
